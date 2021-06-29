@@ -4,6 +4,13 @@ orbs:
   snyk: snyk/snyk@0.1.0
   aws-cli: circleci/aws-cli@2.0.2
   terraform: circleci/terraform@2.0.0
+
+workflows:
+  run-all:
+    jobs:
+      - run_tests
+      - scan_app
+
 jobs:
   run_tests:
     docker:
@@ -22,4 +29,14 @@ jobs:
           path: test/
       - store_artifacts:
           path: test-results          
-          
+  scan_app:
+    docker:
+      - image: cimg/node:14.16.0
+    steps:
+      - checkout
+      - run:
+          name: Snyk Scan Application files 
+          command: npm install 
+      - snyk/scan:
+          fail-on-issues: false
+          monitor-on-build: false
